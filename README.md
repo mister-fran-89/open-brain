@@ -29,11 +29,11 @@ git clone https://github.com/mister-fran-89/open-brain.git
 cd open-brain
 cp .env.example .env
 
+# Point to your LLM server (edit .env)
+# OLLAMA_HOST=http://192.168.1.100:11434
+
 # Start services
 docker compose up -d
-
-# Pull an LLM model
-docker exec ollama ollama pull phi3:mini
 
 # Capture your first thought
 curl -X POST http://localhost:8000/api/capture \
@@ -66,18 +66,22 @@ curl -X POST http://localhost:8000/api/capture \
 │  │   FastAPI   │ │  (voice)    │ │   (vectors/RAG)     ││
 │  │   :8000     │ │   :8001     │ │      :8002          ││
 │  └──────┬──────┘ └─────────────┘ └─────────────────────┘│
-│         │                                                │
-│  ┌──────┴──────────────────────────────────────────────┐│
-│  │              Ollama (local LLM) :11434              ││
-│  └─────────────────────────────────────────────────────┘│
-└─────────────────────────────────────────────────────────┘
-                          │
-            ┌─────────────┴─────────────┐
-            ▼                           ▼
-     ┌────────────┐              ┌────────────┐
-     │  /vault    │              │   /data    │
-     │ (markdown) │              │  (sqlite)  │
-     └────────────┘              └────────────┘
+└─────────┼───────────────────────────────────────────────┘
+          │
+          │ LAN
+          ▼
+┌─────────────────────┐
+│   LLM Server        │
+│  (Ollama/OpenWebUI) │
+│  192.168.x.x:11434  │
+└─────────────────────┘
+          │
+          ▼
+┌─────────────────────┐
+│     Storage         │
+│  /vault  │  /data   │
+│   (md)   │ (sqlite) │
+└─────────────────────┘
 ```
 
 ---
@@ -164,10 +168,22 @@ docker compose up -d
 Key environment variables in `.env`:
 
 ```bash
-VAULT_PATH=/vault              # Where markdown files live
-OLLAMA_HOST=http://ollama:11434
-AI_CLASSIFY_PROVIDER=ollama    # ollama | gemini | openai
-GEMINI_API_KEY=                # If using Gemini
+VAULT_PATH=/vault                       # Where markdown files live
+OLLAMA_HOST=http://192.168.1.100:11434  # Your LLM server IP
+AI_CLASSIFY_PROVIDER=ollama             # ollama | gemini | openai
+GEMINI_API_KEY=                         # If using Gemini
+```
+
+### Using an external LLM server
+
+If you have Ollama or OpenWebUI running on another machine in your LAN:
+
+```bash
+# In .env, point to your LLM server
+OLLAMA_HOST=http://192.168.1.100:11434
+
+# Remove the ollama service from docker-compose.yml (optional)
+# Or just don't start it: docker compose up -d open-brain chromadb whisper
 ```
 
 See [.env.example](.env.example) for all options.
