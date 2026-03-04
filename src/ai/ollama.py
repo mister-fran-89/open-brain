@@ -46,6 +46,13 @@ Items:
 Digest:"""
 
 
+
+PREPROCESS_PROMPT = """Rewrite the following note. Fix spelling and grammar. Remove filler words and repetition. Keep only the core idea, stated once, clearly. Do not add information. Do not explain. Output the rewritten note only.
+
+Note: {text}
+
+Rewritten:"""
+
 class OllamaProvider(AIProvider):
     """Ollama-based AI provider for local inference."""
 
@@ -56,12 +63,14 @@ class OllamaProvider(AIProvider):
         embed_model: str = None,
         query_model: str = None,
         summarize_model: str = None,
+        preprocess_model: str = None,
     ):
         self.host = host or settings.ollama_host
         self.classify_model = classify_model or settings.ollama_classify_model
         self.embed_model = embed_model or settings.ollama_embed_model
         self.query_model = query_model or settings.ollama_query_model
         self.summarize_model = summarize_model or settings.ollama_summarize_model
+        self.preprocess_model = preprocess_model or settings.ollama_preprocess_model
         self._client: Optional[httpx.AsyncClient] = None
 
     async def _get_client(self) -> httpx.AsyncClient:
@@ -141,6 +150,38 @@ class OllamaProvider(AIProvider):
         )
         prompt = SUMMARIZE_PROMPT.format(items=items_text)
         return await self._chat(self.summarize_model, prompt)
+
+    async def preprocess(self, text: str) -> str:
+        """Clean, correct and synthesise raw input. Preserve meaning exactly."""
+        prompt = PREPROCESS_PROMPT.format(text=text)
+        result = await self._chat(self.preprocess_model, prompt)
+        cleaned = result.strip()
+
+        # Strip common model meta-commentary prefixes
+        strip_prefixes = (
+            "rewritten:", "cleaned:", "here is", "here's", "note:",
+            "output:", "result:", "the final", "the cleaned",
+        )
+        lower = cleaned.lower()
+        for prefix in strip_prefixes:
+            if lower.startswith(prefix):
+                cleaned = cleaned[len(prefix):].strip()
+                break
+
+        # If model added a preamble paragraph, take only the last paragraph
+        double_newline = chr(10) + chr(10)
+        if double_newline in cleaned:
+            parts = [p.strip() for p in cleaned.split(double_newline) if p.strip()]
+            last = parts[-1]
+            commentary = ("maintain", "ensure", "essential", "should be", "note that")
+            if not any(c in last.lower() for c in commentary):
+                cleaned = last
+
+        # Safety: fall back to original if result is empty or too short
+        if not cleaned or len(cleaned) < 3:
+            return text
+        return cleaned
+
 
     async def close(self):
         """Close HTTP client."""

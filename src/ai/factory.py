@@ -31,6 +31,7 @@ def get_provider_for_task(task: str) -> AIProvider:
         "embed": settings.ai_embed_provider,
         "query": settings.ai_query_provider,
         "summarize": settings.ai_summarize_provider,
+        "preprocess": settings.ai_preprocess_provider,
     }
 
     provider_name = task_to_setting.get(task, "ollama")

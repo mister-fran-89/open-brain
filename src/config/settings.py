@@ -20,12 +20,14 @@ class Settings(BaseSettings):
     ai_embed_provider: str = "ollama"
     ai_query_provider: str = "ollama"
     ai_summarize_provider: str = "ollama"
+    ai_preprocess_provider: str = "ollama"
 
     # Models
     ollama_classify_model: str = "phi3:mini"
     ollama_embed_model: str = "nomic-embed-text"
     ollama_query_model: str = "qwen2:7b"
     ollama_summarize_model: str = "qwen2:7b"
+    ollama_preprocess_model: str = "phi4-mini:3.8b"
 
     # Whisper
     whisper_host: str = "http://whisper:8080"

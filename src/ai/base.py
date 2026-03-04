@@ -27,3 +27,8 @@ class AIProvider(ABC):
     async def summarize(self, items: list["Item"]) -> str:
         """Generate summary/digest from items."""
         pass
+
+    @abstractmethod
+    async def preprocess(self, text: str) -> str:
+        """Clean, correct and synthesise raw input. Preserve meaning exactly."""
+        pass

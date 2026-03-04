@@ -27,7 +27,6 @@ async def get_index():
 
 
 def get_capture_service():
-    # Note: This is synchronous for simplicity, services are stateless
     from src.storage import MarkdownVault, MetadataIndex
     from src.ai import get_provider_for_task
     from src.core import CaptureService
@@ -35,7 +34,8 @@ def get_capture_service():
     db_path = settings.vault_path / "_index" / "brain.db"
     index = MetadataIndex(db_path)
     ai = get_provider_for_task("classify")
-    return CaptureService(vault=vault, index=index, ai_provider=ai)
+    pre = get_provider_for_task("preprocess")
+    return CaptureService(vault=vault, index=index, ai_provider=ai, preprocess_provider=pre)
 
 
 def get_query_service():

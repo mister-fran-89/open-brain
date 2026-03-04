@@ -23,11 +23,13 @@ class CaptureService:
         index: MetadataIndex,
         ai_provider: AIProvider,
         vector_store=None,  # Optional ChromaDB client
+        preprocess_provider: AIProvider = None,
     ):
         self.vault = vault
         self.index = index
         self.ai_provider = ai_provider
         self.vector_store = vector_store
+        self.preprocess_provider = preprocess_provider
 
     async def capture(
         self,
@@ -35,17 +37,25 @@ class CaptureService:
         source: str = "unknown",
         category_override: Optional[str] = None,
     ) -> Item:
-        """Capture text, classify it, and store."""
-        # Classify
-        classification = await self.ai_provider.classify(text)
+        """Preprocess, classify, and store a captured thought."""
+        raw_text = text.strip()
 
-        # Create item
+        # Preprocess: clean, correct, synthesise — preserve meaning
+        if self.preprocess_provider:
+            clean_text = await self.preprocess_provider.preprocess(raw_text)
+        else:
+            clean_text = raw_text
+
+        # Classify the clean version
+        classification = await self.ai_provider.classify(clean_text)
+
+        # Create item — clean text is content, raw input preserved in metadata
         item = Item(
             id=generate_id(),
             category=classification.category,
             title=classification.title,
-            content=text,
-            metadata=classification.metadata,
+            content=clean_text,
+            metadata={**classification.metadata, "raw_input": raw_text},
             tags=classification.tags,
             confidence=classification.confidence,
             source=source,
