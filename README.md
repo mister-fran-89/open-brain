@@ -41,16 +41,19 @@ curl -X POST http://localhost:8000/api/capture \
   -d '{"text": "Met Alice Chen from Acme Corp today"}'
 ```
 
+Open the web interface at `http://localhost:8010`.
+
 ---
 
 ## Features
 
 | | |
 |---|---|
-| **Capture** | Text, voice, webhooks — classify and store automatically |
+| **Capture** | Text, webhooks — classify and store automatically |
 | **Query** | Natural language questions with RAG-powered answers |
 | **Search** | Full-text search + category/tag filters |
 | **Digest** | Daily and weekly summaries delivered anywhere |
+| **Web UI** | Mobile-first terminal interface (Mr.Fran) at `:8010` |
 | **Storage** | Obsidian-compatible markdown — you own your data |
 | **AI** | Pluggable providers (Ollama, Gemini, OpenAI, Claude) |
 
@@ -59,30 +62,49 @@ curl -X POST http://localhost:8000/api/capture \
 ## Architecture
 
 ```
-┌─────────────────────────────────────────────────────────┐
-│                     Docker Compose                       │
-│  ┌─────────────┐ ┌─────────────┐ ┌─────────────────────┐│
-│  │ Open Brain  │ │   Whisper   │ │      ChromaDB       ││
-│  │   FastAPI   │ │  (voice)    │ │   (vectors/RAG)     ││
-│  │   :8000     │ │   :8001     │ │      :8002          ││
-│  └──────┬──────┘ └─────────────┘ └─────────────────────┘│
-└─────────┼───────────────────────────────────────────────┘
-          │
-          │ LAN
-          ▼
-┌─────────────────────┐
-│   LLM Server        │
-│  (Ollama/OpenWebUI) │
-│  192.168.x.x:11434  │
-└─────────────────────┘
-          │
-          ▼
-┌─────────────────────┐
-│     Storage         │
-│  /vault  │  /data   │
-│   (md)   │ (sqlite) │
-└─────────────────────┘
+┌──────────────────────────────────────────────────────────────┐
+│                       Docker Compose                          │
+│  ┌─────────────┐ ┌─────────────┐ ┌──────────────────────┐   │
+│  │ Open Brain  │ │   Whisper   │ │       ChromaDB       │   │
+│  │   FastAPI   │ │  (voice)    │ │    (vectors/RAG)     │   │
+│  │   :8000     │ │   :8001     │ │       :8002          │   │
+│  └──────┬──────┘ └──────┬──────┘ └──────────────────────┘   │
+│         │               │                                     │
+│  ┌──────▼───────────────▼──────┐                             │
+│  │       brain-web (Mr.Fran)   │                             │
+│  │    terminal UI · :8010      │                             │
+│  └─────────────────────────────┘                             │
+└──────────────────────┬───────────────────────────────────────┘
+                       │ LAN
+                       ▼
+          ┌─────────────────────┐
+          │   LLM Server        │
+          │  (Ollama — external)│
+          │  192.168.x.x:11434  │
+          └─────────────────────┘
+                       │
+                       ▼
+          ┌─────────────────────┐
+          │     Storage         │
+          │  /vault  │  /data   │
+          │   (md)   │ (sqlite) │
+          └─────────────────────┘
 ```
+
+---
+
+## Web UI
+
+`brain-web` is a minimal dark-terminal interface running at `:8010`.
+
+| Tab | What it does |
+|-----|-------------|
+| **Capture** | Type or dictate a thought — classified and stored instantly |
+| **Ask** | Natural language question against your knowledge base |
+| **Search** | Filter by category, tags, or full-text |
+| **Digest** | Generate a daily or weekly summary |
+
+Optimised for mobile (iPhone). Tap the `> _` button at the bottom to activate the keyboard without reaching for the text box.
 
 ---
 
@@ -151,7 +173,7 @@ cd /opt/open-brain
 
 # 2. Configure
 cp .env.example .env
-nano .env  # Add your API keys
+nano .env  # Set OLLAMA_HOST and paths
 
 # 3. Start
 docker compose up -d
@@ -169,24 +191,13 @@ Key environment variables in `.env`:
 
 ```bash
 VAULT_PATH=/vault                       # Where markdown files live
-OLLAMA_HOST=http://192.168.1.100:11434  # Your LLM server IP
+DATA_PATH=/data                         # SQLite and ChromaDB storage
+OLLAMA_HOST=http://192.168.1.100:11434  # Your external LLM server IP
 AI_CLASSIFY_PROVIDER=ollama             # ollama | gemini | openai
 GEMINI_API_KEY=                         # If using Gemini
 ```
 
-### Using an external LLM server
-
-If you have Ollama or OpenWebUI running on another machine in your LAN:
-
-```bash
-# In .env, point to your LLM server
-OLLAMA_HOST=http://192.168.1.100:11434
-
-# Remove the ollama service from docker-compose.yml (optional)
-# Or just don't start it: docker compose up -d open-brain chromadb whisper
-```
-
-See [.env.example](.env.example) for all options.
+Ollama is **not bundled** — point `OLLAMA_HOST` at any Ollama instance on your LAN. See [.env.example](.env.example) for all options.
 
 ---
 
