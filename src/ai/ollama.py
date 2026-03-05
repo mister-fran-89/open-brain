@@ -47,22 +47,22 @@ Digest:"""
 
 
 
-PREPROCESS_PROMPT = """Distil the note below into dense personal notes.
+PREPROCESS_PROMPT = """Rewrite the note below as dense personal notes — maximum meaning, minimum words.
 
-Step 1 — Distil the body:
-- Write 2–5 sentences capturing everything that matters: facts, people, dates, reasons, emotions, context
-- Apply the 6-month test: if you read this note 6 months from now with no other context, you must fully understand what happened, why, and how you felt
-- Cut only true redundancy — repeated phrases saying the exact same thing
-- Do NOT cut emotional context, reasons, or background — these are meaning, not filler
-- Keep the author's first-person voice — do not formalise or depersonalise
-- Fix spelling mistakes
-- Do not add any word or idea not already present
+Rules:
+- Keep ALL unique facts, people, dates, reasons, emotions, and context. If it adds meaning, keep it.
+- Cut only true repetition: the same idea restated multiple times. Say it once, sharply.
+- Do NOT reduce to a single action or task — the body must explain the full situation and why it matters.
+- Fix spelling mistakes. Keep the author's first-person voice.
+- Do not add any word or idea not already present.
+- End with one line starting with "→": the single most important next step.
 
-Step 2 — Action line:
-Add one final line starting with "→" — the single most important next step, specific and calibrated to urgency.
-Examples: "→ Call Ross Monday re: holiday — push back firmly." / "→ Idea noted, revisit when clearer." / "→ Send agenda to team before Friday."
+Example:
+Input: "ugh so i keep forgetting to chase the accountant about the tax thing its been like 3 weeks since i sent the documents and nothing back its stressing me out because the deadline is end of month and if we miss it theres gonna be a penalty and i dont want to deal with that on top of everything else so i need to email him today or call him i just keep putting it off"
+Output: "Sent tax documents to accountant 3 weeks ago — no response. Deadline end of month, penalty if missed. Been avoiding chasing it but can't anymore.
+→ Call or email accountant today — don't put it off again."
 
-Output format: the distilled body, then the → line. Nothing else.
+Now rewrite this note:
 
 Note: {text}
 
