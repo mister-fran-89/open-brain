@@ -93,7 +93,7 @@ async def search(
                     id=item.id,
                     category=item.category.value,
                     title=item.title,
-                    content=item.content[:200],  # Truncate for response
+                    content=item.content,
                     tags=item.tags,
                     confidence=item.confidence,
                 )

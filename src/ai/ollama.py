@@ -47,11 +47,21 @@ Digest:"""
 
 
 
-PREPROCESS_PROMPT = """Rewrite the following note. Fix spelling and grammar. Remove filler words and repetition. Keep only the core idea, stated once, clearly. Do not add information. Do not explain. Output the rewritten note only.
+PREPROCESS_PROMPT = """Edit the note below. You may only:
+- Fix spelling mistakes
+- Fix grammar errors
+- Remove duplicate ideas and filler words (like, so, you know, um, stuff, thing)
+
+You must not:
+- Add any word, fact, emotion, or idea not already present
+- Paraphrase or reinterpret — preserve the author's exact intent and wording where possible
+- Draw conclusions or infer consequences
+
+Output only the edited note. Nothing else.
 
 Note: {text}
 
-Rewritten:"""
+Edited note:"""
 
 class OllamaProvider(AIProvider):
     """Ollama-based AI provider for local inference."""
@@ -78,7 +88,7 @@ class OllamaProvider(AIProvider):
             self._client = httpx.AsyncClient(timeout=60.0)
         return self._client
 
-    async def _chat(self, model: str, prompt: str) -> str:
+    async def _chat(self, model: str, prompt: str, temperature: float = 0.7) -> str:
         """Send chat completion request."""
         client = await self._get_client()
         response = await client.post(
@@ -87,6 +97,7 @@ class OllamaProvider(AIProvider):
                 "model": model,
                 "messages": [{"role": "user", "content": prompt}],
                 "stream": False,
+                "options": {"temperature": temperature},
             },
         )
         response.raise_for_status()
@@ -154,7 +165,7 @@ class OllamaProvider(AIProvider):
     async def preprocess(self, text: str) -> str:
         """Clean, correct and synthesise raw input. Preserve meaning exactly."""
         prompt = PREPROCESS_PROMPT.format(text=text)
-        result = await self._chat(self.preprocess_model, prompt)
+        result = await self._chat(self.preprocess_model, prompt, temperature=0.1)
         cleaned = result.strip()
 
         # Strip common model meta-commentary prefixes

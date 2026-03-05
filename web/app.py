@@ -326,6 +326,109 @@ INDEX_HTML = """<!doctype html>
     }
     .pill.on { border-color: var(--accent); color: var(--accent); background: rgba(232,104,38,.08); }
 
+    /* ── Detail overlay ─────────────────────────── */
+    .detail-overlay {
+      position: fixed;
+      inset: 0;
+      background: var(--bg);
+      z-index: 400;
+      display: none;
+      overflow-y: auto;
+      -webkit-overflow-scrolling: touch;
+    }
+    .detail-overlay.open { display: block; animation: slideUp .22s ease; }
+
+    .detail-inner {
+      max-width: 680px;
+      margin: 0 auto;
+      padding: 28px 20px 110px;
+    }
+
+    .detail-header { margin-bottom: 18px; }
+
+    .detail-eyebrow {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 10px;
+    }
+    .detail-cat-badge {
+      font-family: var(--mono);
+      font-size: 0.7rem;
+      text-transform: uppercase;
+      letter-spacing: 0.09em;
+      color: var(--accent);
+      background: rgba(232,104,38,.1);
+      border: 1px solid rgba(232,104,38,.3);
+      border-radius: 4px;
+      padding: 2px 9px;
+    }
+    .detail-date {
+      font-family: var(--mono);
+      font-size: 0.72rem;
+      color: var(--muted);
+    }
+    .detail-title {
+      font-size: 1.45rem;
+      font-weight: 700;
+      color: var(--text);
+      line-height: 1.25;
+      letter-spacing: -0.02em;
+      margin: 0 0 12px;
+    }
+    .detail-tags { display: flex; flex-wrap: wrap; gap: 5px; margin-bottom: 24px; }
+
+    .detail-divider {
+      border: none;
+      border-top: 1px solid var(--border);
+      margin: 0 0 24px;
+    }
+
+    /* Markdown body */
+    .detail-body { font-size: 0.95rem; line-height: 1.8; color: var(--text); }
+    .detail-body h1 { font-size: 1.25rem; font-weight: 700; color: var(--text); margin: 22px 0 8px; letter-spacing: -0.01em; }
+    .detail-body h2 { font-size: 1.1rem;  font-weight: 600; color: var(--text); margin: 18px 0 6px; }
+    .detail-body h3 { font-size: 0.95rem; font-weight: 600; color: var(--muted); margin: 14px 0 4px; text-transform: uppercase; letter-spacing: 0.05em; }
+    .detail-body p  { margin: 0 0 14px; }
+    .detail-body ul, .detail-body ol { padding-left: 20px; margin: 0 0 14px; }
+    .detail-body li { margin-bottom: 5px; }
+    .detail-body strong { font-weight: 600; color: var(--text); }
+    .detail-body em    { color: var(--muted); font-style: italic; }
+    .detail-body code  {
+      font-family: var(--mono); font-size: 0.83em;
+      background: var(--surface2); border-radius: 4px;
+      padding: 1px 6px; color: var(--accent);
+    }
+    .detail-body blockquote {
+      border-left: 3px solid var(--accent);
+      margin: 0 0 14px; padding: 8px 14px;
+      background: var(--surface); border-radius: 0 6px 6px 0;
+      color: var(--muted);
+    }
+
+    .detail-footer-bar {
+      position: fixed;
+      bottom: 0; left: 0; right: 0;
+      background: var(--bg);
+      border-top: 1px solid var(--border);
+      padding: 12px 20px max(16px, env(safe-area-inset-bottom, 16px));
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      z-index: 401;
+    }
+    .detail-id-label {
+      font-family: var(--mono);
+      font-size: 0.68rem;
+      color: var(--muted);
+    }
+
+    /* Clickable result cards */
+    .r-card { cursor: pointer; transition: border-color .15s, background .15s; }
+    .r-card:hover { border-color: var(--accent); background: rgba(232,104,38,.04); }
+    .r-card:active { background: rgba(232,104,38,.08); }
+    .r-card .r-arrow { float: right; color: var(--muted); font-family: var(--mono); font-size: 0.8rem; margin-top: 2px; }
+
     /* ── Digest output ───────────────────────── */
     .digest-box {
       background: var(--surface);
@@ -355,6 +458,42 @@ INDEX_HTML = """<!doctype html>
     .inline-row .prompt { flex: 1; padding: 10px 14px; }
     .inline-row .prompt textarea,
     .inline-row .prompt input { min-height: unset; }
+
+    /* ── Processing state ───────────────────── */
+    .processing-wrap {
+      display: none;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--r);
+      padding: 28px 20px;
+      text-align: center;
+      animation: slideUp .2s ease;
+    }
+    .processing-wrap.show { display: block; }
+    .proc-line {
+      font-family: var(--mono);
+      font-size: 0.9rem;
+      color: var(--muted);
+      letter-spacing: 0.06em;
+    }
+    .proc-dots { color: var(--accent); }
+    .proc-timer {
+      font-family: var(--mono);
+      font-size: 0.72rem;
+      color: var(--muted);
+      margin-top: 10px;
+      letter-spacing: 0.04em;
+    }
+    .proc-timer span { color: var(--accent); }
+
+    /* ── Capture another button ──────────────── */
+    .capture-again {
+      margin-top: 14px;
+      display: block;
+    }
+
+    /* ── Capture input area ──────────────────── */
+    #cap-input-area { transition: opacity .15s; }
 
     /* ── Float trigger button ────────────────── */
     .float-btn {
@@ -407,25 +546,36 @@ INDEX_HTML = """<!doctype html>
 
   <!-- CAPTURE ──────────────────────────────── -->
   <section id="tab-capture" class="panel active">
-    <div class="lbl">Capture thought:</div>
-    <div class="prompt">
-      <span class="prompt-chr">&gt;</span>
-      <textarea id="cap" rows="3" placeholder="type or dictate…" autofocus></textarea>
+
+    <div id="cap-input-area">
+      <div class="lbl">Capture thought:</div>
+      <div class="prompt" id="cap-prompt-wrap">
+        <span class="prompt-chr">&gt;</span>
+        <textarea id="cap" rows="3" placeholder="type or dictate…" autofocus></textarea>
+      </div>
+      <div class="mt16">
+        <button class="btn btn-accent" onclick="doCapture()">[ capture ]</button>
+      </div>
     </div>
-    <div class="mt16">
-      <button class="btn btn-accent" onclick="doCapture()">[ capture ]</button>
+
+    <div id="cap-processing" class="processing-wrap">
+      <div class="proc-line">&gt; processing<span class="proc-dots" id="proc-dots">.</span></div>
+      <div class="proc-timer">elapsed: <span id="proc-timer">0.0s</span></div>
     </div>
+
     <div id="cap-ok" class="confirm">
       <div class="confirm-chk">✓</div>
-      <div>
+      <div style="width:100%">
         <div class="confirm-title">Note captured — stored in <strong id="ok-cat">—</strong></div>
         <div class="confirm-meta">
           id:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span id="ok-id">—</span><br>
           category: <span id="ok-cat2">—</span>
         </div>
+        <button class="btn btn-accent capture-again" onclick="captureAnother()">[ capture another ]</button>
       </div>
     </div>
     <div id="cap-err" class="err"></div>
+
   </section>
 
   <!-- ASK ──────────────────────────────────── -->
@@ -489,10 +639,69 @@ cap.addEventListener('input', () => { cap.style.height = 'auto'; cap.style.heigh
 // ── Capture ─────────────────────────────────
 cap.addEventListener('keydown', e => { if (e.key === 'Enter' && (e.metaKey || e.ctrlKey)) doCapture(); });
 
+// ── Processing animation + elapsed timer ─────
+let _dotTimer = null;
+let _timerStart = null;
+let _timerRAF = null;
+
+function startProcessing() {
+  // dots
+  const dots = document.getElementById('proc-dots');
+  let n = 1;
+  _dotTimer = setInterval(() => { dots.textContent = '.'.repeat((n++ % 3) + 1); }, 500);
+  // elapsed timer
+  _timerStart = performance.now();
+  const timerEl = document.getElementById('proc-timer');
+  function tick() {
+    const sec = ((performance.now() - _timerStart) / 1000).toFixed(1);
+    timerEl.textContent = sec + 's';
+    _timerRAF = requestAnimationFrame(tick);
+  }
+  _timerRAF = requestAnimationFrame(tick);
+}
+
+function stopProcessing() {
+  clearInterval(_dotTimer); _dotTimer = null;
+  cancelAnimationFrame(_timerRAF); _timerRAF = null;
+  _timerStart = null;
+  document.getElementById('proc-timer').textContent = '0.0s';
+  document.getElementById('proc-dots').textContent = '.';
+}
+
+function showInput() {
+  document.getElementById('cap-input-area').style.display = '';
+  const fb = document.getElementById('float-btn');
+  if (fb) { fb.style.display = ''; fb.classList.remove('away'); }
+}
+
+function hideInput() {
+  document.getElementById('cap-input-area').style.display = 'none';
+  const fb = document.getElementById('float-btn');
+  if (fb) { fb.classList.add('away'); setTimeout(() => { fb.style.display = 'none'; }, 380); }
+}
+
+function showProc() {
+  document.getElementById('cap-processing').classList.add('show');
+}
+function hideProc() {
+  document.getElementById('cap-processing').classList.remove('show');
+}
+
+function captureAnother() {
+  hide('cap-ok');
+  showInput();
+  cap.focus();
+  const cp = cap.closest('.prompt');
+  if (cp) cp.classList.add('open');
+}
+
 async function doCapture() {
   const text = cap.value.trim();
   if (!text) return;
   hide('cap-ok'); hide('cap-err');
+  hideInput();
+  showProc();
+  startProcessing();
 
   try {
     const r = await fetch('/ingest/text', {
@@ -500,14 +709,24 @@ async function doCapture() {
       body: JSON.stringify({text})
     });
     const j = await r.json().catch(() => ({error:'bad json'}));
-    if (!r.ok) return showErr('cap-err', j.error || j.detail || JSON.stringify(j));
+    stopProcessing(); hideProc();
+
+    if (!r.ok) {
+      showInput();
+      return showErr('cap-err', j.error || j.detail || JSON.stringify(j));
+    }
 
     document.getElementById('ok-cat').textContent  = j.category;
     document.getElementById('ok-cat2').textContent = j.category;
     document.getElementById('ok-id').textContent   = j.id;
     document.getElementById('cap-ok').classList.add('show');
     cap.value = ''; cap.style.height = 'auto';
-  } catch(e) { showErr('cap-err', e.message); }
+
+  } catch(e) {
+    stopProcessing(); hideProc();
+    showInput();
+    showErr('cap-err', e.message);
+  }
 }
 
 // ── Ask ─────────────────────────────────────
@@ -533,6 +752,8 @@ async function doAsk() {
 }
 
 // ── Search ───────────────────────────────────
+let _searchItems = [];
+
 async function doSearch() {
   const text = document.getElementById('s-q').value.trim()   || null;
   const cat  = document.getElementById('s-cat').value        || null;
@@ -548,13 +769,15 @@ async function doSearch() {
     if (!r.ok) return setHtml('search-out', errHtml(j.error || JSON.stringify(j)));
     if (!j.items?.length) return setHtml('search-out', `<div class="loading" style="animation:none">no results.</div>`);
 
+    _searchItems = j.items;
     setHtml('search-out',
       `<div class="loading" style="animation:none;margin-bottom:4px">${j.count} result(s)</div>` +
-      j.items.map(i => `
-        <div class="r-card">
+      j.items.map((i, idx) => `
+        <div class="r-card" onclick="openDetail(${idx})">
+          <span class="r-arrow">›</span>
           <div class="r-meta">${x(i.category)} · ${x(i.id)}</div>
           <div class="r-title">${x(i.title)}</div>
-          <div class="r-body">${x(i.content)}</div>
+          <div class="r-body">${x(i.content.slice(0,160))}${i.content.length>160?'…':''}</div>
           <div class="tags">${(i.tags||[]).map(t=>'<span class="tag">'+x(t)+'</span>').join('')}</div>
         </div>`).join('')
     );
@@ -583,6 +806,92 @@ async function doDigest() {
       `<div class="digest-box">${x(j.content)}</div>`
     );
   } catch(e) { setHtml('digest-out', errHtml(e.message)); }
+}
+
+// ── Detail overlay ───────────────────────────
+function openDetail(idx) {
+  const item = _searchItems[idx];
+  if (!item) return;
+
+  document.getElementById('d-cat').textContent   = item.category;
+  document.getElementById('d-title').textContent = item.title;
+  document.getElementById('d-id').textContent    = 'id: ' + item.id;
+
+  // Parse date from ID format YYYYMMDD-HHMMSS-xxxx
+  const m = item.id.match(/^(\d{4})(\d{2})(\d{2})-(\d{2})(\d{2})(\d{2})/);
+  document.getElementById('d-date').textContent = m
+    ? `${m[1]}-${m[2]}-${m[3]} ${m[4]}:${m[5]}` : '';
+
+  document.getElementById('d-tags').innerHTML =
+    (item.tags||[]).map(t => `<span class="tag">${x(t)}</span>`).join('');
+
+  document.getElementById('d-body').innerHTML = renderMd(item.content || '');
+  document.getElementById('detail-overlay').classList.add('open');
+  document.documentElement.style.overflow = 'hidden';
+}
+
+function closeDetail() {
+  document.getElementById('detail-overlay').classList.remove('open');
+  document.documentElement.style.overflow = '';
+}
+
+// Swipe down to close on mobile
+(function() {
+  let startY = 0;
+  const ov = document.getElementById('detail-overlay');
+  ov.addEventListener('touchstart', e => { startY = e.touches[0].clientY; }, {passive:true});
+  ov.addEventListener('touchend', e => {
+    if (e.changedTouches[0].clientY - startY > 80) closeDetail();
+  }, {passive:true});
+})();
+
+// Minimal markdown renderer — line-by-line parser
+function renderMd(raw) {
+  if (!raw) return '';
+
+  function esc(t) {
+    return String(t).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+  }
+  function inline(t) {
+    return esc(t)
+      .replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>')
+      .replace(/\*(.+?)\*/g,       '<em>$1</em>')
+      .replace(/`([^`]+)`/g,        '<code>$1</code>');
+  }
+
+  const lines = raw.split(String.fromCharCode(10));
+  const blocks = [];
+  let listBuf = [];
+
+  function flushList() {
+    if (listBuf.length) { blocks.push('<ul>' + listBuf.join('') + '</ul>'); listBuf = []; }
+  }
+
+  for (const line of lines) {
+    if (!line.trim())              { flushList(); blocks.push(null); continue; }
+    if (line.startsWith('> '))     { flushList(); blocks.push('<blockquote>' + inline(line.slice(2)) + '</blockquote>'); continue; }
+    if (line.startsWith('### '))   { flushList(); blocks.push('<h3>' + inline(line.slice(4)) + '</h3>'); continue; }
+    if (line.startsWith('## '))    { flushList(); blocks.push('<h2>' + inline(line.slice(3)) + '</h2>'); continue; }
+    if (line.startsWith('# '))     { flushList(); blocks.push('<h1>' + inline(line.slice(2)) + '</h1>'); continue; }
+    if (/^[-*] /.test(line))       { listBuf.push('<li>' + inline(line.slice(2)) + '</li>'); continue; }
+    flushList();
+    blocks.push(inline(line));
+  }
+  flushList();
+
+  // Group plain text lines into <p> tags, separated by null (blank line)
+  const out = [];
+  let para = [];
+  function flushPara() {
+    if (para.length) { out.push('<p>' + para.join(' ') + '</p>'); para = []; }
+  }
+  for (const b of blocks) {
+    if (b === null)                          { flushPara(); }
+    else if (/^<[hbu]/.test(b))             { flushPara(); out.push(b); }
+    else                                     { para.push(b); }
+  }
+  flushPara();
+  return out.join('');
 }
 
 // ── Helpers ──────────────────────────────────
@@ -632,6 +941,26 @@ go = function(name) {
 };
 </script>
 
+  <!-- Detail overlay -->
+  <div id="detail-overlay" class="detail-overlay">
+    <div class="detail-inner">
+      <div class="detail-header">
+        <div class="detail-eyebrow">
+          <span class="detail-cat-badge" id="d-cat">—</span>
+          <span class="detail-date" id="d-date">—</span>
+        </div>
+        <h1 class="detail-title" id="d-title">—</h1>
+        <div class="detail-tags" id="d-tags"></div>
+      </div>
+      <hr class="detail-divider">
+      <div class="detail-body" id="d-body"></div>
+    </div>
+    <div class="detail-footer-bar">
+      <span class="detail-id-label" id="d-id">—</span>
+      <button class="btn btn-accent" onclick="closeDetail()">[ close ]</button>
+    </div>
+  </div>
+
   <!-- Floating type trigger (capture tab only) -->
   <label for="cap" id="float-btn" class="float-btn">&gt;&nbsp;<span class="cur">_</span></label>
 
@@ -649,7 +978,7 @@ async def ingest_text(payload: dict):
     text = (payload.get("text") or "").strip()
     if not text:
         return JSONResponse({"error": "text required"}, status_code=400)
-    async with httpx.AsyncClient(timeout=60) as client:
+    async with httpx.AsyncClient(timeout=180) as client:
         r = await client.post(f"{BRAIN_URL}/api/capture", json={"text": text, "source": "web_text"})
     if r.status_code != 200:
         return JSONResponse({"error": "brain capture failed", "detail": r.text}, status_code=502)
