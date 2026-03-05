@@ -24,6 +24,7 @@ class CaptureResponse(BaseModel):
     tags: list[str]
     confidence: float
     source: str
+    captured: str
 
 
 @router.post("/capture", response_model=CaptureResponse)
@@ -45,6 +46,7 @@ async def capture_text(
             tags=item.tags,
             confidence=item.confidence,
             source=item.source,
+            captured=item.captured.isoformat(),
         )
     finally:
         await service.index.close()

@@ -568,7 +568,9 @@ INDEX_HTML = """<!doctype html>
       <div style="width:100%">
         <div class="confirm-title">Note captured — stored in <strong id="ok-cat">—</strong></div>
         <div class="confirm-meta">
+          <div id="ok-title" style="font-weight:600;margin-bottom:4px;cursor:pointer;text-decoration:underline;text-decoration-color:var(--acc)" onclick="openLastCapture()">—</div>
           id:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span id="ok-id">—</span><br>
+          date:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span id="ok-date">—</span><br>
           category: <span id="ok-cat2">—</span>
         </div>
         <button class="btn btn-accent capture-again" onclick="captureAnother()">[ capture another ]</button>
@@ -716,9 +718,21 @@ async function doCapture() {
       return showErr('cap-err', j.error || j.detail || JSON.stringify(j));
     }
 
-    document.getElementById('ok-cat').textContent  = j.category;
-    document.getElementById('ok-cat2').textContent = j.category;
-    document.getElementById('ok-id').textContent   = j.id;
+    _lastCapture = j;
+    document.getElementById('ok-cat').textContent   = j.category;
+    document.getElementById('ok-cat2').textContent  = j.category;
+    document.getElementById('ok-id').textContent    = j.id;
+    document.getElementById('ok-title').textContent = j.title || '—';
+    // Format date from captured ISO string or parse from id
+    let okDate = '—';
+    if (j.captured) {
+      const d = new Date(j.captured);
+      okDate = d.toLocaleDateString() + ' ' + d.toLocaleTimeString([], {hour:'2-digit',minute:'2-digit'});
+    } else {
+      const m = j.id.match(/^(\d{4})(\d{2})(\d{2})-(\d{2})(\d{2})/);
+      if (m) okDate = m[1]+'-'+m[2]+'-'+m[3]+' '+m[4]+':'+m[5];
+    }
+    document.getElementById('ok-date').textContent = okDate;
     document.getElementById('cap-ok').classList.add('show');
     cap.value = ''; cap.style.height = 'auto';
 
@@ -753,6 +767,7 @@ async function doAsk() {
 
 // ── Search ───────────────────────────────────
 let _searchItems = [];
+  let _lastCapture = null;
 
 async function doSearch() {
   const text = document.getElementById('s-q').value.trim()   || null;
@@ -809,6 +824,25 @@ async function doDigest() {
 }
 
 // ── Detail overlay ───────────────────────────
+function openLastCapture() {
+  if (!_lastCapture) return;
+  const item = _lastCapture;
+  document.getElementById('d-cat').textContent   = item.category;
+  document.getElementById('d-title').textContent = item.title;
+  document.getElementById('d-id').textContent    = 'id: ' + item.id;
+  let dateStr = '';
+  if (item.captured) {
+    const d = new Date(item.captured);
+    dateStr = d.toLocaleDateString() + ' ' + d.toLocaleTimeString([], {hour:'2-digit',minute:'2-digit'});
+  }
+  document.getElementById('d-date').textContent = dateStr;
+  document.getElementById('d-tags').innerHTML =
+    (item.tags||[]).map(t => '<span class="tag">'+x(t)+'</span>').join(' ');
+  document.getElementById('d-body').innerHTML = renderMd(item.content || '');
+  document.getElementById('detail-overlay').classList.add('open');
+  document.documentElement.style.overflow = 'hidden';
+}
+
 function openDetail(idx) {
   const item = _searchItems[idx];
   if (!item) return;
