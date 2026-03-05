@@ -184,14 +184,14 @@ class OllamaProvider(AIProvider):
                 cleaned = cleaned[len(prefix):].strip()
                 break
 
-        # If model added a preamble paragraph, take only the last paragraph
+        # Strip meta-commentary preamble if the first paragraph looks like one
         double_newline = chr(10) + chr(10)
         if double_newline in cleaned:
             parts = [p.strip() for p in cleaned.split(double_newline) if p.strip()]
-            last = parts[-1]
-            commentary = ("maintain", "ensure", "essential", "should be", "note that")
-            if not any(c in last.lower() for c in commentary):
-                cleaned = last
+            preamble_markers = ("here is", "here's", "the following", "below is", "i have rewritten", "i've rewritten")
+            if parts and any(parts[0].lower().startswith(m) for m in preamble_markers):
+                parts = parts[1:]
+            cleaned = double_newline.join(parts)
 
         # Safety: fall back to original if result is empty or too short
         if not cleaned or len(cleaned) < 3:
