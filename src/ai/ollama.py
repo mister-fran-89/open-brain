@@ -47,19 +47,22 @@ Digest:"""
 
 
 
-PREPROCESS_PROMPT = """Distil the note below into the most compact version possible without losing any meaning, intent, context, or emotion.
+PREPROCESS_PROMPT = """Distil the note below into dense personal notes. Every word must earn its place.
 
-Rules:
-- Every word must earn its place — cut anything that doesn't add information
-- Collapse repetition: if the same point is made multiple times, say it once, sharply
-- Preserve ALL unique facts, feelings, actions, people, and context — nothing meaningful can be dropped
+Step 1 — Distil:
+- Cut all filler, venting, and scene-setting that carries no new information
+- If the same point is made multiple times, keep the sharpest version, cut the rest
+- Preserve ALL unique facts, people, dates, emotions, and context — nothing meaningful drops
 - Keep the author's first-person voice — do not formalise or depersonalise
 - Fix spelling mistakes
-- Do not add any word, idea, or interpretation not already present
+- Do not add any word or idea not already present
 
-Think of it as dense personal notes: maximum meaning, minimum words.
+Step 2 — Action line:
+Add a final line starting with "→" — one sharp, specific next action calibrated to the urgency and type of note.
+Examples: "→ Call Ross Monday re: holiday — don't let this slide." / "→ Thought noted, revisit when calmer." / "→ Send follow-up email to team today."
+The action must follow naturally from the note content.
 
-Output only the distilled note. Nothing else.
+Output format: distilled note, then the → line. Nothing else.
 
 Note: {text}
 
