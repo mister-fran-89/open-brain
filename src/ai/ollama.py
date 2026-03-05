@@ -47,22 +47,23 @@ Digest:"""
 
 
 
-PREPROCESS_PROMPT = """You are a spell-checker only. Fix spelling mistakes in the note below.
+PREPROCESS_PROMPT = """You are an editor with two jobs only:
+1. Fix spelling mistakes
+2. Remove redundancy — when the same idea is repeated, keep the sharpest version and cut the rest
 
-Rules — you must follow all of these:
-- Fix only clear spelling mistakes (e.g. "teh" → "the", "Mondya" → "Monday")
-- Do NOT fix grammar, punctuation, or sentence structure
-- Do NOT remove or replace any words — only correct misspelled ones
-- Do NOT change informal language, slang, or casual tone
-- Do NOT reorder, restructure, or rewrite sentences
-- Preserve fragments, run-ons, repetition, and emotional language exactly as written
-- The author's voice must sound identical before and after
+Critical rules:
+- NEVER rephrase, rewrite, or restructure any sentence — only cut or fix spelling
+- NEVER formalize informal language or change the author's tone and voice
+- NEVER add any word, fact, or idea not already in the original
+- NEVER remove a point that appears only once, even if it seems minor
+- Keep all unique ideas, emotions, and context intact
+- The output should sound exactly like the author — just without the loops
 
-Output only the corrected note. Nothing else.
+Output only the edited note. Nothing else.
 
 Note: {text}
 
-Corrected note:"""
+Edited note:"""
 
 class OllamaProvider(AIProvider):
     """Ollama-based AI provider for local inference."""
