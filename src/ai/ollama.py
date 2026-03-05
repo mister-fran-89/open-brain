@@ -47,23 +47,23 @@ Digest:"""
 
 
 
-PREPROCESS_PROMPT = """You are an editor with two jobs only:
-1. Fix spelling mistakes
-2. Remove redundancy — when the same idea is repeated, keep the sharpest version and cut the rest
+PREPROCESS_PROMPT = """Distil the note below into the most compact version possible without losing any meaning, intent, context, or emotion.
 
-Critical rules:
-- NEVER rephrase, rewrite, or restructure any sentence — only cut or fix spelling
-- NEVER formalize informal language or change the author's tone and voice
-- NEVER add any word, fact, or idea not already in the original
-- NEVER remove a point that appears only once, even if it seems minor
-- Keep all unique ideas, emotions, and context intact
-- The output should sound exactly like the author — just without the loops
+Rules:
+- Every word must earn its place — cut anything that doesn't add information
+- Collapse repetition: if the same point is made multiple times, say it once, sharply
+- Preserve ALL unique facts, feelings, actions, people, and context — nothing meaningful can be dropped
+- Keep the author's first-person voice — do not formalise or depersonalise
+- Fix spelling mistakes
+- Do not add any word, idea, or interpretation not already present
 
-Output only the edited note. Nothing else.
+Think of it as dense personal notes: maximum meaning, minimum words.
+
+Output only the distilled note. Nothing else.
 
 Note: {text}
 
-Edited note:"""
+Distilled note:"""
 
 class OllamaProvider(AIProvider):
     """Ollama-based AI provider for local inference."""
