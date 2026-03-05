@@ -47,7 +47,7 @@ You throw raw thoughts at it — rushed, ungrammatical, repetitive, half-formed.
 │  └──────┬──────┘ └─────────────┘ └──────────────────────┘  │
 │         │                                                    │
 │  ┌──────▼──────────────────────┐                            │
-│  │   brain-web  (Mr.Fran)      │                            │
+│  │         brain-web            │                            │
 │  │   terminal UI · :8010       │                            │
 │  └─────────────────────────────┘                            │
 └──────────────────────┬───────────────────────────────────────┘
@@ -57,7 +57,7 @@ You throw raw thoughts at it — rushed, ungrammatical, repetitive, half-formed.
           │     Ollama (external)   │
           │   192.168.x.x:11434     │
           │                         │
-          │  phi4-mini  — preprocess│
+          │  qwen2.5:7b — preprocess│
           │  qwen2.5:7b — classify  │
           │  nomic-embed — embed    │
           │  qwen2.5:7b — query     │
@@ -113,7 +113,7 @@ Preprocessing (distillation) and classification are different cognitive tasks. K
 
 ## Web UI
 
-`brain-web` runs at `:8010` — dark terminal aesthetic, mobile-first.
+The web UI runs at `:8010` — dark terminal aesthetic, mobile-first.
 
 | Tab | What it does |
 |-----|-------------|
@@ -179,7 +179,7 @@ DATA_PATH=/data                          # ChromaDB storage
 OLLAMA_HOST=http://192.168.1.100:11434   # External Ollama instance
 
 # Model assignment — each task runs on its own model slot
-OLLAMA_PREPROCESS_MODEL=phi4-mini:3.8b          # Distil raw input
+OLLAMA_PREPROCESS_MODEL=qwen2.5:7b-instruct-q4_K_M  # Distil raw input
 OLLAMA_MODEL=qwen2.5:7b-instruct-q4_K_M        # Classify
 OLLAMA_EMBED_MODEL=nomic-embed-text             # Embed
 OLLAMA_QUERY_MODEL=qwen2.5:7b-instruct-q4_K_M  # Answer queries
