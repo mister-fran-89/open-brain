@@ -47,22 +47,22 @@ Digest:"""
 
 
 
-PREPROCESS_PROMPT = """Distil the note below into dense personal notes. Every word must earn its place.
+PREPROCESS_PROMPT = """Distil the note below into dense personal notes.
 
-Step 1 — Distil:
-- Cut all filler, venting, and scene-setting that carries no new information
-- If the same point is made multiple times, keep the sharpest version, cut the rest
-- Preserve ALL unique facts, people, dates, emotions, and context — nothing meaningful drops
+Step 1 — Distil the body:
+- Write 2–5 sentences capturing everything that matters: facts, people, dates, reasons, emotions, context
+- Apply the 6-month test: if you read this note 6 months from now with no other context, you must fully understand what happened, why, and how you felt
+- Cut only true redundancy — repeated phrases saying the exact same thing
+- Do NOT cut emotional context, reasons, or background — these are meaning, not filler
 - Keep the author's first-person voice — do not formalise or depersonalise
 - Fix spelling mistakes
 - Do not add any word or idea not already present
 
 Step 2 — Action line:
-Add a final line starting with "→" — one sharp, specific next action calibrated to the urgency and type of note.
-Examples: "→ Call Ross Monday re: holiday — don't let this slide." / "→ Thought noted, revisit when calmer." / "→ Send follow-up email to team today."
-The action must follow naturally from the note content.
+Add one final line starting with "→" — the single most important next step, specific and calibrated to urgency.
+Examples: "→ Call Ross Monday re: holiday — push back firmly." / "→ Idea noted, revisit when clearer." / "→ Send agenda to team before Friday."
 
-Output format: distilled note, then the → line. Nothing else.
+Output format: the distilled body, then the → line. Nothing else.
 
 Note: {text}
 
